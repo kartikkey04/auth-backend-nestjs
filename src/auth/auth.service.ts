@@ -6,10 +6,16 @@ import { SignupDto } from './dtos/signup.dto';
 import { User } from './schemas/user.schema';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dtos/login.dto';
+import { JwtService } from '@nestjs/jwt';
+import { RefreshToken } from './schemas/refresh-token.schema';
+import { v4 as uuidv4} from 'uuid';
 
 @Injectable()
 export class AuthService {
-    constructor(@InjectModel(User.name) private UserModel: Model<User>) {}
+    constructor(@InjectModel(User.name) private UserModel: Model<User>,
+                @InjectModel(RefreshToken.name) private RefreshTokenModel: Model<RefreshToken>,
+                private jwtService: JwtService,
+            ) {}
 
     async signup(signupData: SignupDto){
 
@@ -46,8 +52,15 @@ export class AuthService {
             throw new UnauthorizedException("wrong credentials");
         }
 
+        return this.generateUserTokens(user._id);
+    }
+
+    async generateUserTokens(userId){
+        const accessToken = this.jwtService.sign({userId},{expiresIn: '1h'});
+        const refreshToken = uuidv4();
         return{
-            message: "success",
-        }
+            accessToken,
+            refreshToken
+        };
     }
 }

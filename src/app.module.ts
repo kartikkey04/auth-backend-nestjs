@@ -18,19 +18,20 @@ import  config  from './config/config';
     JwtModule.registerAsync({ 
       imports:[ConfigModule],
       useFactory: async(config) => ({
-        secret: config.get('jwt-secret'),
+        secret: config.get('jwt.secret'),
       }),
       global: true,
       inject: [ConfigService],
     }),
-    AuthModule, 
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (config) => ({
         uri: config.get('database.connectionString'),
       }),
       inject: [ConfigService],
-    }),],
+    }),
+    AuthModule, 
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
